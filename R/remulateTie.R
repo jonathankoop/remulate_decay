@@ -175,7 +175,7 @@ remulateTie <- function(
   startTime = 0,
   initial = 0,
   riskset = NULL,
-  memory = c("full", "window", "window_m", "decay"),
+  memory = c("full", "window", "window_m", "decay", "logistic"),
   memoryParam = NULL) {
 
   waiting_time="exp"
@@ -201,7 +201,7 @@ remulateTie <- function(
 
   memory<- match.arg(memory)
   #checking memory specification
-  if (!memory[1] %in% c("full", "window", "window_m", "decay")) {
+  if (!memory[1] %in% c("full", "window", "window_m", "decay", "logistic")) {
     stop(paste("\n'", memory[1], "'memory method not defined"))
   }
   if (memory != "full" && is.null(memoryParam)) {
@@ -367,6 +367,14 @@ remulateTie <- function(
       for (j in 1:i) {
         #loop through edgelist
         adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + exp((-(t - edgelist[j, 1])) * (log(2) / memoryParam))
+      }
+    }
+    else if (memory == "logistic") {
+      #TODO: to vectorize
+      adj_mat[] <- 0
+      for (j in 1:i) {
+        #loop through edgelist
+        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + 1/(1+exp(memoryParam[1]*((t - edgelist[j, 1])-memoryParam[2])))
       }
     }
     
