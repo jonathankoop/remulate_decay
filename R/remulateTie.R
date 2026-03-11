@@ -175,8 +175,9 @@ remulateTie <- function(
   startTime = 0,
   initial = 0,
   riskset = NULL,
-  memory = c("full", "window", "window_m", "decay", "logistic"),
-  memoryParam = NULL) {
+  memory = c("full", "window", "window_m", "decay", "logistic", "custom"),
+  memoryParam = NULL,
+  memoryFunction = NULL) {
 
   waiting_time="exp"
 
@@ -201,15 +202,18 @@ remulateTie <- function(
 
   memory<- match.arg(memory)
   #checking memory specification
-  if (!memory[1] %in% c("full", "window", "window_m", "decay", "logistic")) {
+  if (!memory[1] %in% c("full", "window", "window_m", "decay", "logistic", "custom")) {
     stop(paste("\n'", memory[1], "'memory method not defined"))
   }
-  if (memory != "full" && is.null(memoryParam)) {
+  if (!(memory %in% c("full", "custom")) && is.null(memoryParam)) {
     if (memory[1] == "window" || memory[1] == "window_m") {
       stop(paste("Cannot use window memory technique without a memoryParam value"))
     } else if (memoryParam <= 0) {
       stop(paste("memoryParam must be positive"))
     }
+  }
+  if (memory == "custom" && is.null(memoryFunction)) {
+    stop(paste("Cannot use custom memory without a memoryFunction"))
   }
 
   #create a map for user name actor references - integer actor ids for computing
@@ -375,6 +379,13 @@ remulateTie <- function(
       for (j in 1:i) {
         #loop through edgelist
         adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + 1/(1+exp(memoryParam[1]*((t - edgelist[j, 1])-memoryParam[2])))
+      }
+    }
+    else if (memory == "custom") {
+      adj_mat[] <- 0
+      for (j in 1:i) {
+        #loop through edgelist
+        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + eval(substitute(memoryFunction[[2]], list(x = t - edgelist[j, 1])))
       }
     }
     
