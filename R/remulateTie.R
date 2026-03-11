@@ -382,10 +382,14 @@ remulateTie <- function(
       }
     }
     else if (memory == "custom") {
+      memoryFunction_fun <- function(x) {
+        eval(memoryFunction[[2]])
+      }
+      
       adj_mat[] <- 0
       for (j in 1:i) {
         #loop through edgelist
-        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + eval(substitute(memoryFunction[[2]], list(x = t - edgelist[j, 1])))
+        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + memoryFunction_fun(t - edgelist[j, 1])
       }
     }
     
