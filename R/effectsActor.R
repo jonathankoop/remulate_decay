@@ -162,7 +162,8 @@ remulateActorEffects <- function(rateEffects = TRUE, choiceEffects = TRUE){
       "recencyContinue", #30
       "recencySendReceiver", #31,#32
       "recencyReceiveReceiver", #33, #34
-      "rrankSend","rrankReceive" #35, #36
+      "rrankSend","rrankReceive", #35, #36
+      "psABAB" #37
     )
     return(effects)
    }    
@@ -184,7 +185,8 @@ remulateActorEffects <- function(rateEffects = TRUE, choiceEffects = TRUE){
         "recencyContinue", #30
         "recencySendSender","recencySendReceiver", #31,#32
         "recencyReceiveSender","recencyReceiveReceiver", #33, #34
-        "rrankSend","rrankReceive" #35, #36
+        "rrankSend","rrankReceive", #35, #36
+        "psABAB" #37
       )
       return(effects)
   }

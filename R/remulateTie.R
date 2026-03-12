@@ -43,6 +43,7 @@
 #'  \item \code{psABXB()}
 #'  \item \code{psABXY()}
 #'  \item \code{psABAY()}
+#'  \item \code{psABAB()}
 #'  \item \code{recencyContinue()}
 #'  \item \code{recencySendSender()}
 #'  \item \code{recencySendReceiver()}

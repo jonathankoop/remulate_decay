@@ -96,6 +96,7 @@ to create an event i->j if j has received more events in the past.  The statisti
 \item{\code{psABXA}}{ AB-XA Participating shifts (turn usurping) is the tendency to create an event h->i at timepoint t if event i->j occurred at timepoint t-1. The psABXA statistic is equal to one for the dyads (h,i) for all h not equal to j, that will create the participation shift at timepoint t.}
 \item{\code{psABXB}}{ AB-XB Participating shifts (turn usurping) is the tendency to create an event h->j at timepoint t if event i->j occurred at timepoint t-1. The psABXB statistic is equal to one for the dyads (h,j) for all h not equal to i, that will create the participation shift at timepoint t.}
 \item{\code{psABXY}}{ AB-XY Participating shifts (turn usurping) is the tendency to create an event h->k at timepoint t if event i->j occurred at timepoint t-1. The psABXB statistic is equal to one for the dyads (h,k) for all h not equal to i and k not equal to j, that will create the participation shift at timepoint t. }
+\item{\code{psABAB}}{ AB-AB Participating shift (turn repeating) is the tendency to create an event i->j at timepoint t if event i->j occurred at timepoint t-1. The psABAB statistic is equal to one for the dyad (i,j) that will create the participation shift at timepoint t.}
 }
 
 \strong{Endogenous effects (Recency statistics):}

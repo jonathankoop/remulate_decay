@@ -131,7 +131,8 @@ parseEffectsTie <- function(formula){
     "recencyContinue", #30
     "recencySendSender","recencySendReceiver", #31,#32
     "recencyReceiveSender","recencyReceiveReceiver", #33, #34
-    "rrankSend","rrankReceive" #35, #36
+    "rrankSend","rrankReceive", #35, #36
+    "psABAB" #37
   )
   
   if(any(! names(effects) %in% all_effects)){
@@ -340,7 +341,8 @@ parseEffectsChoice <- function(formula){
       "recencyContinue", #30
       "","recencySendReceiver", #31,#32
       "","recencyReceiveReceiver", #33, #34
-      "","rrankReceive" #35, #36    
+      "","rrankReceive", #35, #36
+      "psABAB" #37
   )
   
   # Prepare effects for switch  case
@@ -456,7 +458,8 @@ parseEffectsTieRemstimate <- function(remstimate_object){
         "psABBA", "psABBY", "psABXA", 
         "psABXB", "psABXY", "psABAY", "dyad",
         "interact", "recencyContinue", "recencySendSender", "recencySendReceiver",
-        "recencyReceiveSender", "recencyReceiveReceiver", "rrankSend", "rrankReceive")
+        "recencyReceiveSender", "recencyReceiveReceiver", "rrankSend", "rrankReceive",
+        "psABAB")
      
     
     if (any(!names(effects) %in% all_effects)) {

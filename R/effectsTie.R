@@ -86,6 +86,7 @@
 #' \item{\code{psABXA}}{ AB-XA Participating shifts (turn usurping) is the tendency to create an event h->i at timepoint t if event i->j occurred at timepoint t-1. The psABXA statistic is equal to one for the dyads (h,i) for all h not equal to j, that will create the participation shift at timepoint t.}
 #' \item{\code{psABXB}}{ AB-XB Participating shifts (turn usurping) is the tendency to create an event h->j at timepoint t if event i->j occurred at timepoint t-1. The psABXB statistic is equal to one for the dyads (h,j) for all h not equal to i, that will create the participation shift at timepoint t.}
 #' \item{\code{psABXY}}{ AB-XY Participating shifts (turn usurping) is the tendency to create an event h->k at timepoint t if event i->j occurred at timepoint t-1. The psABXB statistic is equal to one for the dyads (h,k) for all h not equal to i and k not equal to j, that will create the participation shift at timepoint t. }
+#' \item{\code{psABAB}}{ AB-AB Participating shift (turn repeating) is the tendency to create an event i->j at timepoint t if event i->j occurred at timepoint t-1. The psABAB statistic is equal to one for the dyad (i,j) that will create the participation shift at timepoint t.}
 #' }
 #' 
 #' \strong{Endogenous effects (Recency statistics):}
@@ -200,7 +201,8 @@ remulateTieEffects <- function(endogenous = NULL) {
         "psABBA", "psABBY", "psABXA", 
         "psABXB", "psABXY", "psABAY", "dyad",
         "interact", "recencyContinue", "recencySendSender", "recencySendReceiver",
-        "recencyReceiveSender", "recencyReceiveReceiver", "rrankSend", "rrankReceive")
+        "recencyReceiveSender", "recencyReceiveReceiver", "rrankSend", "rrankReceive",
+        "psABAB")
     return(effects)
   }
   if(endogenous){
@@ -223,7 +225,8 @@ remulateTieEffects <- function(endogenous = NULL) {
     "recencyContinue", #30
     "recencySendSender","recencySendReceiver", #31,#32
     "recencyReceiveSender","recencyReceiveReceiver", #33, #34
-    "rrankSend","rrankReceive" #35, #36
+    "rrankSend","rrankReceive", #35, #36
+    "psABAB" #37
   )
   return(effects)
   }
@@ -694,6 +697,29 @@ psABXY <- function(param = NULL, scaling = c("none", "std")) {
 psABAY <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
   out <- prepEndoVar(effect_name = "psABAY", param = param, scaling = scaling)
+  out
+}
+
+#'psABAB
+#' 
+#' This function specifies the input for the psABAB effect in the \code{formula} argument for the function \code{\link{remulateTie}} or \code{\link{remulateActor}}. Not to be used independently
+#' 
+#' @param param numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model
+#' 
+#' @param scaling the method for scaling the psABAB statistic. \code{"none"} [default] gives raw value of the statistic at time t, \code{"std"} the statistic is standardized per time point.
+#' @details
+#' 
+#' if param is a data frame, it must have three columns: sender, receiver, and value (numeric), 
+#' representing the parameter value for thay dyadic pair. The data.frame must contain 
+#' all pairs of actors or dyads corresponding to the riskset. 
+#' 
+#' if param is a function, it's first argument must be 't', corresponding to the time. The
+#' function may have additional arguments.
+#' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
+#' @export
+psABAB <- function(param = NULL, scaling = c("none", "std")) {
+  scaling <- match.arg(scaling)
+  out <- prepEndoVar(effect_name = "psABAB", param = param, scaling = scaling)
   out
 }
 

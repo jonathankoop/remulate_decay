@@ -880,6 +880,15 @@ arma::mat computeStatsTie(const arma::vec &int_effects,
             }
             break;
         }
+            //PS AB-AB
+        case 37:
+        {
+            arma::uword sender = edgelist(edgelist.n_rows - 1, 1);
+            arma::uword receiver = edgelist(edgelist.n_rows - 1, 2);
+            arma::uvec psdyads = find(rs.col(0) == sender && rs.col(1) == receiver);
+            statsrow(psdyads(0)) = 1;
+            break;
+        }
         //recency continue
         case 30:
         {
