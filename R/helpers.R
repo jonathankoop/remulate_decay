@@ -203,6 +203,12 @@ parseEffectsTie <- function(formula){
     i
   })
   
+  #Prepare transforms
+  transforms <- lapply(effects,function(x){
+    tr <- x$transform
+    tr
+  })
+
   return(list(
     "int_effects"=int_effects,
     "params"=params,
@@ -212,7 +218,8 @@ parseEffectsTie <- function(formula){
     "attributes"=attributes,
     "interact_effects"=interact_effects,
     "mem_start"=mem_start,
-    "mem_end"=mem_end))
+    "mem_end"=mem_end,
+    "transforms"=transforms))
 }
 
 # attr_actors- list of data frames for each each effect in formula, NULL if the effect is not exogenous and a data frame with columns (id,time,value) if exogenous
@@ -304,13 +311,20 @@ parseEffectsRate <- function(formula,pred = FALSE){
     i
   })
   
+  #Prepare transforms
+  transforms <- lapply(effects,function(x){
+    tr <- x$transform
+    tr
+  })
+
   return(list("int_effects"=int_effects,
       "params"=params,
       "is_param_dyadic" = is_param_dyadic,
       "scaling"=scaling,
       "effects"=stat_names,
       "attributes"=attributes,
-      "interact_effects"=interact_effects))
+      "interact_effects"=interact_effects,
+      "transforms"=transforms))
 }
 
 parseEffectsChoice <- function(formula){
@@ -410,6 +424,12 @@ parseEffectsChoice <- function(formula){
     i
   })
   
+  #Prepare transforms
+  transforms <- lapply(effects,function(x){
+    tr <- x$transform
+    tr
+  })
+
   return(list(
     "int_effects"=int_effects,
     "params"=params,
@@ -419,7 +439,8 @@ parseEffectsChoice <- function(formula){
     "attributes"=attributes,
     "interact_effects"=interact_effects,
     "mem_start"=mem_start,
-    "mem_end"=mem_end))
+    "mem_end"=mem_end,
+    "transforms"=transforms))
 }
 
 # Does not work with interact effects(!) and exogenous stats objects must be loaded
@@ -496,6 +517,8 @@ parseEffectsTieRemstimate <- function(remstimate_object){
       NULL
     })
     
+    transforms <- lapply(effects, function(x) NULL)
+
     return(list(
         "int_effects" = int_effects,
         "params" = params,
@@ -504,13 +527,14 @@ parseEffectsTieRemstimate <- function(remstimate_object){
         "attributes" = attributes,
         "interact_effects" = interact_effects,
         "mem_start" = mem_start,
-        "mem_end" = mem_end
+        "mem_end" = mem_end,
+        "transforms" = transforms
     ))
 }
 
 
 # Internal function, modified from remstats
-prepExoVar <- function(effect_name, param, scaling, variable, attr_actors) {
+prepExoVar <- function(effect_name, param, scaling, variable, attr_actors, transform=NULL) {
   # Warning for missing values
   if(anyNA(attr_actors[,variable])) {
     stop(paste("Missing values in attr_actors object, variable:",variable))
@@ -545,6 +569,18 @@ prepExoVar <- function(effect_name, param, scaling, variable, attr_actors) {
     }
   }
 
+  # Convert transform formula to function
+  transform_fun <- NULL
+  if (!is.null(transform)) {
+    if (inherits(transform, "formula")) {
+      transform_fun <- function(x) eval(transform[[2]], list(x = x))
+    } else if (is.function(transform)) {
+      transform_fun <- transform
+    } else {
+      stop(paste0("'transform' for ", effect_name, " must be a formula (~ f(x)) or a function."))
+    }
+  }
+
   out <- list(
     effect = list(
       param= param,
@@ -553,7 +589,8 @@ prepExoVar <- function(effect_name, param, scaling, variable, attr_actors) {
       attribute = attribute,
       mem_start=0,
       mem_end=0,
-      stat_name = paste0(effect_name,"_",variable)
+      stat_name = paste0(effect_name,"_",variable),
+      transform=transform_fun
     )
   )
   names(out) <- effect_name
@@ -561,7 +598,7 @@ prepExoVar <- function(effect_name, param, scaling, variable, attr_actors) {
 }
 
 # Internal function, modified from remstats
-prepEndoVar <- function(effect_name, param, scaling,start=0,end=0) {
+prepEndoVar <- function(effect_name, param, scaling,start=0,end=0, transform=NULL) {
   
   scaling <- match(scaling,c("full","std","prop","log"))
   if(start!=0 || end!=0){
@@ -579,6 +616,18 @@ prepEndoVar <- function(effect_name, param, scaling,start=0,end=0) {
     }
   }
 
+  # Convert transform formula to function
+  transform_fun <- NULL
+  if (!is.null(transform)) {
+    if (inherits(transform, "formula")) {
+      transform_fun <- function(x) eval(transform[[2]], list(x = x))
+    } else if (is.function(transform)) {
+      transform_fun <- transform
+    } else {
+      stop(paste0("'transform' for ", effect_name, " must be a formula (~ f(x)) or a function."))
+    }
+  }
+
   out <- list(
     effect = list(
       param= param,
@@ -587,7 +636,8 @@ prepEndoVar <- function(effect_name, param, scaling,start=0,end=0) {
       mem_start=start,
       mem_end=end,
       stat_name = stat_name,
-      attribute=NULL
+      attribute=NULL,
+      transform=transform_fun
     )
   )
   
@@ -595,7 +645,7 @@ prepEndoVar <- function(effect_name, param, scaling,start=0,end=0) {
   out
 }
 
-prepInteractVar <- function(param=NULL,effects,scaling){
+prepInteractVar <- function(param=NULL,effects,scaling,transform=NULL){
   
   scaling <- match(scaling,c("full","std","prop"))
   
@@ -609,6 +659,18 @@ prepInteractVar <- function(param=NULL,effects,scaling){
     }
   }
 
+  # Convert transform formula to function
+  transform_fun <- NULL
+  if (!is.null(transform)) {
+    if (inherits(transform, "formula")) {
+      transform_fun <- function(x) eval(transform[[2]], list(x = x))
+    } else if (is.function(transform)) {
+      transform_fun <- transform
+    } else {
+      stop("'transform' for interact must be a formula (~ f(x)) or a function.")
+    }
+  }
+
   out <- list(
     interact=list(
       param = param,
@@ -618,7 +680,8 @@ prepInteractVar <- function(param=NULL,effects,scaling){
       scaling = 3,
       mem_start=0,
       mem_end=0,
-      attribute = NULL
+      attribute = NULL,
+      transform=transform_fun
     )
   )
   names(out) <- "interact"

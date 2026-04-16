@@ -203,7 +203,9 @@ remulateActor <- function(
     s_attributes <- parsed_s$attributes
     s_effects <- unname(parsed_s$effects)
     s_interact_effects <- parsed_s$interact_effects
+    s_transforms <- parsed_s$transforms
     s_P <- length(s_effects)
+    s_has_transforms <- any(!sapply(s_transforms, is.null))
     #process input for receiver choice sub-model
     parsed_d <- parseEffectsChoice(choiceEffects)
     d_params <- parsed_d$params
@@ -214,7 +216,9 @@ remulateActor <- function(
     d_attributes <- parsed_d$attributes
     d_effects <- unname(parsed_d$effects)
     d_interact_effects <- parsed_d$interact_effects
+    d_transforms <- parsed_d$transforms
     d_P <- length(d_effects)
+    d_has_transforms <- any(!sapply(d_transforms, is.null))
     memory<- match.arg(memory)
     #checking memory specification
     if(! memory[1] %in% c("full","window","window_m","decay","vu")){
@@ -310,16 +314,40 @@ remulateActor <- function(
     while(t <= endTime){
                 
         #compute rate and choice probabilities
+        # Apply nonlinear transforms for rate statistics
+        if (s_has_transforms) {
+          s_stats_for_lambda <- rateStatistics[[i]]
+          for (k in 1:s_P) {
+            if (!is.null(s_transforms[[k]])) {
+              s_stats_for_lambda[, k] <- s_transforms[[k]](s_stats_for_lambda[, k])
+            }
+          }
+        } else {
+          s_stats_for_lambda <- rateStatistics[[i]]
+        }
+
         if(s_P==1){
-            s_lambda <- exp(rateStatistics[[1]] * gamma)
+            s_lambda <- exp(s_stats_for_lambda * gamma)
         } else{
-            s_lambda <- exp(rateStatistics[[i]] %*% gamma)
+            s_lambda <- exp(s_stats_for_lambda %*% gamma)
+        }
+
+        # Apply nonlinear transforms for choice statistics
+        if (d_has_transforms) {
+          d_stats_for_lambda <- choiceStatistics[[i]]
+          for (k in 1:d_P) {
+            if (!is.null(d_transforms[[k]])) {
+              d_stats_for_lambda[, k] <- d_transforms[[k]](d_stats_for_lambda[, k])
+            }
+          }
+        } else {
+          d_stats_for_lambda <- choiceStatistics[[i]]
         }
 
         if(d_P==1){
-                d_lambda <- exp(choiceStatistics[[1]] * beta)
+                d_lambda <- exp(d_stats_for_lambda * beta)
         } else{
-            d_lambda <- exp(choiceStatistics[[i]] %*% beta)
+            d_lambda <- exp(d_stats_for_lambda %*% beta)
         }
  
         #sampling waiting time dt

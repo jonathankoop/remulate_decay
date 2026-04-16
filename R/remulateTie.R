@@ -201,9 +201,11 @@ remulateTie <- function(
   int_effects <- parsed_effects$int_effects
   attributes <- parsed_effects$attributes
   interact_effects <- parsed_effects$interact_effects
+  transforms <- parsed_effects$transforms
   effect_names <- unname(parsed_effects$effects)
   
   P <- length(effect_names)
+  has_transforms <- any(!sapply(transforms, is.null))
 
   memory<- match.arg(memory)
   #checking memory specification
@@ -302,18 +304,25 @@ remulateTie <- function(
 
   while(t <= endTime){
     #updating event rate / lambda
-    # if (P == 1) {
-    #   lambda <- exp(statistics[[i]] * beta)
-    # } else {
-    #   lambda <- exp(statistics[[i]] %*% beta)
-    # }
+    # Apply nonlinear transforms to statistics before computing lambda
+    if (has_transforms) {
+      stats_for_lambda <- statistics[[i]]
+      for (k in 1:P) {
+        if (!is.null(transforms[[k]])) {
+          stats_for_lambda[, k] <- transforms[[k]](stats_for_lambda[, k])
+        }
+      }
+    } else {
+      stats_for_lambda <- statistics[[i]]
+    }
+
     if(any(is_param_dyadic)){      
-        lambda <- exp(rowSums(statistics[[i]] * beta_mat))
+        lambda <- exp(rowSums(stats_for_lambda * beta_mat))
     }else{
         if (P == 1) {
-            lambda <- exp(statistics[[i]] * beta)
+            lambda <- exp(stats_for_lambda * beta)
         } else {
-            lambda <- exp(statistics[[i]] %*% beta)
+            lambda <- exp(stats_for_lambda %*% beta)
         }
     }
 
