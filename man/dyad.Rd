@@ -4,7 +4,13 @@
 \alias{dyad}
 \title{dyad}
 \usage{
-dyad(param = NULL, variable, attr_dyads, scaling = c("none", "std"))
+dyad(
+  param = NULL,
+  variable,
+  attr_dyads,
+  scaling = c("none", "std"),
+  transform = NULL
+)
 }
 \arguments{
 \item{param}{numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model}

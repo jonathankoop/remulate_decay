@@ -572,6 +572,13 @@ prepExoVar <- function(effect_name, param, scaling, variable, attr_actors, trans
   # Convert transform formula to function
   transform_fun <- NULL
   if (!is.null(transform)) {
+    if (isTRUE(scaling == 2)) {
+      warning(paste0("Using 'transform' with scaling='std' for ", effect_name,
+        ": the transform will be applied to standardized (z-score) values ",
+        "rather than raw statistics, which is likely not meaningful. ",
+        "Consider using scaling='none' with a transform instead."),
+        call. = FALSE)
+    }
     if (inherits(transform, "formula")) {
       transform_fun <- function(x) eval(transform[[2]], list(x = x))
     } else if (is.function(transform)) {
@@ -619,6 +626,13 @@ prepEndoVar <- function(effect_name, param, scaling,start=0,end=0, transform=NUL
   # Convert transform formula to function
   transform_fun <- NULL
   if (!is.null(transform)) {
+    if (isTRUE(scaling == 2)) {
+      warning(paste0("Using 'transform' with scaling='std' for ", effect_name,
+        ": the transform will be applied to standardized (z-score) values ",
+        "rather than raw statistics, which is likely not meaningful. ",
+        "Consider using scaling='none' with a transform instead."),
+        call. = FALSE)
+    }
     if (inherits(transform, "formula")) {
       transform_fun <- function(x) eval(transform[[2]], list(x = x))
     } else if (is.function(transform)) {

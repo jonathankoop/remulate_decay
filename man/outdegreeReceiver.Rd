@@ -4,7 +4,11 @@
 \alias{outdegreeReceiver}
 \title{outdegreeReceiver}
 \usage{
-outdegreeReceiver(param = NULL, scaling = c("none", "std", "prop"))
+outdegreeReceiver(
+  param = NULL,
+  scaling = c("none", "std", "prop"),
+  transform = NULL
+)
 }
 \arguments{
 \item{param}{numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model}

@@ -4,7 +4,11 @@
 \alias{outdegreeSender}
 \title{outdegreeSender}
 \usage{
-outdegreeSender(param = NULL, scaling = c("none", "std", "prop"))
+outdegreeSender(
+  param = NULL,
+  scaling = c("none", "std", "prop"),
+  transform = NULL
+)
 }
 \arguments{
 \item{param}{numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model}

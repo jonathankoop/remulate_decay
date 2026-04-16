@@ -43,17 +43,16 @@ are predicted.}
 defining a custom risk set.}
 
 \item{memory}{[Optional] A string (default = "full") specifying the memory 
-type used for computing statistics. \code{"full"} uses the entire event history. \code{"window"} considers only events occurring within a specified time window. 
-\code{"window_m"} considers only a specified number of most recent events. \code{"decay"} applies an exponential decay, where older events contribute 
-less based on elapsed time. \code{"logistic"} applies a logistic (sigmoid) decay, where the weight of an event decreases according to
-\eqn{1 / (1 + \exp(\alpha \cdot (\Delta t - \mu)))},
-with \eqn{\alpha} controlling the steepness and \eqn{\mu} the midpoint of the decay.
-\code{"custom"} applies a user-supplied weighting function provided via the \code{memoryFunction} argument.}
+type used for computing statistics. `"full"` uses the entire event history. `"window"` considers only events occurring within a specified time window. 
+`"window_m"` considers only a specified number of most recent events. `"decay"` applies an exponential decay, where older events contribute 
+less based on elapsed time. `"logistic"` applies a logistic (sigmoid) decay, where the weight of an event decreases according to 
+\eqn{1 / (1 + \exp(\alpha \cdot (\Delta t - \mu)))}, with \eqn{\alpha} controlling the steepness and \eqn{\mu} the midpoint of the decay. 
+`"custom"` applies a user-supplied weighting function provided via the `memoryFunction` argument.}
 
 \item{memoryParam}{[Optional] A numeric value or vector defining the memory 
-parameter(s) based on the selected memory type. \code{"window"} defines the length of the time window. \code{"window_m"} specifies the number of past events to consider. \code{"decay"} represents the half-life (i.e., time until an event's weight is reduced to half). \code{"logistic"} requires a two-element vector \code{c(alpha, mu)}, where \code{alpha} (> 0) controls the steepness of the sigmoid and \code{mu} (>= 0) is the time offset at which the weight equals 0.5.}
+parameter(s) based on the selected memory type. `"window"` defines the length of the time window. `"window_m"` specifies the number of past events to consider. `"decay"` represents the half-life (i.e., time until an event\'s weight is reduced to half). `"logistic"` requires a two-element vector `c(alpha, mu)`, where `alpha` (> 0) controls the steepness of the sigmoid and `mu` (>= 0) is the time offset at which the weight equals 0.5.}
 
-\item{memoryFunction}{[Optional] A one-sided formula of the form \code{~ f(x)} used when \code{memory = "custom"}. The variable \code{x} represents the elapsed time since a past event (i.e., the difference between the current time and the event time). The formula is evaluated for each past event to determine its weight in the adjacency matrix. For example, \code{~ exp(-x)} applies a simple exponential decay.}
+\item{memoryFunction}{[Optional] A one-sided formula of the form `~ f(x)` used when `memory = "custom"`. The variable `x` represents the elapsed time since a past event (i.e., the difference between the current time and the event time). The formula is evaluated for each past event to determine its weight in the adjacency matrix. For example, `~ exp(-x)` applies a simple exponential decay.}
 }
 \value{
 An object of class \code{"remulateTie"}. A data.frame containing the simulated event sequence with columns (time, sender, receiver).

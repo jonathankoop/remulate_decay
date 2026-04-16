@@ -4,12 +4,21 @@
 \alias{inertia}
 \title{inertia}
 \usage{
-inertia(param = NULL, scaling = c("none", "std", "prop"))
+inertia(param = NULL, scaling = c("none", "std", "prop"), transform = NULL)
 }
 \arguments{
 \item{param}{numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model}
 
 \item{scaling}{the method for scaling the inertia statistic. \code{"none"} [default] gives raw value of the statistic at time t, \code{"std"} the statistic is standardized per time point, and \code{"prop"} denotes proportional scaling in which raw counts are divided by the out degree of the sender at time t.}
+
+\item{transform}{[Optional] A one-sided formula or function specifying a nonlinear transformation 
+to apply to the statistic value before computing event rates. The variable \code{x} represents 
+the raw statistic value. For example, \code{~ log(1 + x)} applies a logarithmic transformation 
+(diminishing returns), and \code{~ sqrt(x)} applies a square root transformation. 
+This is distinct from memory decay (which weights past events by elapsed time) and from 
+time-varying parameters (which change the coefficient over time). 
+The transform is applied only for the rate computation; raw statistics are preserved in the output. 
+Default is \code{NULL} (no transformation, i.e., the standard linear effect \eqn{\beta \cdot x}).}
 }
 \value{
 List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
@@ -24,4 +33,23 @@ all pairs of actors or dyads corresponding to the riskset.
 
 if param is a function, it's first argument must be 't', corresponding to the time. The
 function may have additional arguments.
+
+if transform is specified, the linear predictor contribution of this effect becomes 
+\eqn{\beta \cdot f(x)} instead of \eqn{\beta \cdot x}, where \eqn{f} is the supplied 
+transformation. This can be used to model nonlinear effects such as diminishing returns 
+(e.g., \code{~ log(1 + x)}) or saturation (e.g., \code{~ x / (1 + x)}).
+}
+\examples{
+ # Inertia with diminishing returns (log transform)
+ effects <- ~ remulate::baseline(-5) + 
+             remulate::inertia(0.1, transform = ~ log(1 + x))
+ 
+ # Inertia with square root transform (sublinear growth)
+ effects <- ~ remulate::baseline(-5) + 
+             remulate::inertia(0.1, transform = ~ sqrt(x))
+ 
+ # Inertia with saturation transform via function
+ effects <- ~ remulate::baseline(-5) + 
+             remulate::inertia(0.1, transform = function(x) x / (1 + x))
+
 }

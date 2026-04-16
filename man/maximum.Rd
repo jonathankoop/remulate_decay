@@ -4,7 +4,13 @@
 \alias{maximum}
 \title{maximum}
 \usage{
-maximum(param = NULL, variable, attr_actors, scaling = c("none", "std"))
+maximum(
+  param = NULL,
+  variable,
+  attr_actors,
+  scaling = c("none", "std"),
+  transform = NULL
+)
 }
 \arguments{
 \item{param}{numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model}

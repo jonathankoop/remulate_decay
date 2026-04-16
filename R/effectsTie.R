@@ -272,9 +272,9 @@ baseline <- function(param = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-tie <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+tie <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "tie", param = param, scaling = scaling, start=0, end=0, transform=transform)
+  out <- prepEndoVar(effect_name = "tie", param = param, scaling = scaling, start=0, end=0)
   out
 }
 
@@ -286,6 +286,16 @@ tie <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' @param param numeric value, data.frame  or function with time parameter. Specifies the value of the effect for the statistic in the REM model
 #' 
 #' @param scaling the method for scaling the inertia statistic. \code{"none"} [default] gives raw value of the statistic at time t, \code{"std"} the statistic is standardized per time point, and \code{"prop"} denotes proportional scaling in which raw counts are divided by the out degree of the sender at time t.
+#' 
+#' @param transform [Optional] A one-sided formula or function specifying a nonlinear transformation 
+#' to apply to the statistic value before computing event rates. The variable \code{x} represents 
+#' the raw statistic value. For example, \code{~ log(1 + x)} applies a logarithmic transformation 
+#' (diminishing returns), and \code{~ sqrt(x)} applies a square root transformation. 
+#' This is distinct from memory decay (which weights past events by elapsed time) and from 
+#' time-varying parameters (which change the coefficient over time). 
+#' The transform is applied only for the rate computation; raw statistics are preserved in the output. 
+#' Default is \code{NULL} (no transformation, i.e., the standard linear effect \eqn{\beta \cdot x}).
+#' 
 #' @details
 #' 
 #' if param is a data frame, it must have three columns: sender, receiver, and value (numeric), 
@@ -294,6 +304,25 @@ tie <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' 
 #' if param is a function, it's first argument must be 't', corresponding to the time. The
 #' function may have additional arguments.
+#' 
+#' if transform is specified, the linear predictor contribution of this effect becomes 
+#' \eqn{\beta \cdot f(x)} instead of \eqn{\beta \cdot x}, where \eqn{f} is the supplied 
+#' transformation. This can be used to model nonlinear effects such as diminishing returns 
+#' (e.g., \code{~ log(1 + x)}) or saturation (e.g., \code{~ x / (1 + x)}).
+#' 
+#' @examples 
+#'  # Inertia with diminishing returns (log transform)
+#'  effects <- ~ remulate::baseline(-5) + 
+#'              remulate::inertia(0.1, transform = ~ log(1 + x))
+#'  
+#'  # Inertia with square root transform (sublinear growth)
+#'  effects <- ~ remulate::baseline(-5) + 
+#'              remulate::inertia(0.1, transform = ~ sqrt(x))
+#'  
+#'  # Inertia with saturation transform via function
+#'  effects <- ~ remulate::baseline(-5) + 
+#'              remulate::inertia(0.1, transform = function(x) x / (1 + x))
+#'
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
 inertia <- function(param = NULL, scaling = c("none", "std", "prop"), transform = NULL) {
@@ -575,9 +604,9 @@ isp <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABBA <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABBA <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABBA", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABBA", param = param, scaling = scaling)
   out
 }
 
@@ -599,9 +628,9 @@ psABBA <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABBY <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABBY <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABBY", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABBY", param = param, scaling = scaling)
   out
 }
 
@@ -623,9 +652,9 @@ psABBY <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABXA <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABXA <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABXA", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABXA", param = param, scaling = scaling)
   out
 }
 
@@ -647,9 +676,9 @@ psABXA <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABXB <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABXB <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABXB", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABXB", param = param, scaling = scaling)
   out
 }
 
@@ -671,9 +700,9 @@ psABXB <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABXY <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABXY <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABXY", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABXY", param = param, scaling = scaling)
   out
 }
 
@@ -694,9 +723,9 @@ psABXY <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABAY <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABAY <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABAY", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABAY", param = param, scaling = scaling)
   out
 }
 
@@ -717,9 +746,9 @@ psABAY <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-psABAB <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
+psABAB <- function(param = NULL, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepEndoVar(effect_name = "psABAB", param = param, scaling = scaling, transform=transform)
+  out <- prepEndoVar(effect_name = "psABAB", param = param, scaling = scaling)
   out
 }
 
@@ -738,8 +767,8 @@ psABAB <- function(param = NULL, scaling = c("none", "std"), transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-recencyContinue <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "recencyContinue", param = param, scaling = "none", transform=transform)
+recencyContinue <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "recencyContinue", param = param, scaling = "none")
   out
 }
 
@@ -758,8 +787,8 @@ recencyContinue <- function(param = NULL, transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-recencySendSender <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "recencySendSender", param = param, scaling = "none", transform=transform)
+recencySendSender <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "recencySendSender", param = param, scaling = "none")
   out
 }
 
@@ -778,8 +807,8 @@ recencySendSender <- function(param = NULL, transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-recencySendReceiver <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "recencySendReceiver", param = param, scaling = "none", transform=transform)
+recencySendReceiver <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "recencySendReceiver", param = param, scaling = "none")
   out
 }
 
@@ -799,8 +828,8 @@ recencySendReceiver <- function(param = NULL, transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-recencyReceiveSender <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "recencyReceiveSender", param = param, scaling = "none", transform=transform)
+recencyReceiveSender <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "recencyReceiveSender", param = param, scaling = "none")
   out
 }
 
@@ -819,8 +848,8 @@ recencyReceiveSender <- function(param = NULL, transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-recencyReceiveReceiver <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "recencyReceiveReceiver", param = param, scaling = "none", transform=transform)
+recencyReceiveReceiver <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "recencyReceiveReceiver", param = param, scaling = "none")
   out
 }
 
@@ -840,8 +869,8 @@ recencyReceiveReceiver <- function(param = NULL, transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-rrankReceive <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "rrankReceive", param = param, scaling = "none", transform=transform)
+rrankReceive <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "rrankReceive", param = param, scaling = "none")
   out
 }
 
@@ -861,8 +890,8 @@ rrankReceive <- function(param = NULL, transform = NULL) {
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-rrankSend <- function(param = NULL, transform = NULL) {
-  out <- prepEndoVar(effect_name = "rrankSend", param = param, scaling = "none", transform=transform)
+rrankSend <- function(param = NULL) {
+  out <- prepEndoVar(effect_name = "rrankSend", param = param, scaling = "none")
   out
 }
 
@@ -939,9 +968,9 @@ receive <- function(param = NULL, variable, attr_actors, scaling = c("none", "st
 #' function may have additional arguments.
 #' @returns List with all information required by `remulate::remulateTie()` or 'remulate::remulateActor()' to compute the statistic.
 #' @export
-same <- function(param = NULL, variable, attr_actors, scaling = c("none", "std"), transform = NULL) {
+same <- function(param = NULL, variable, attr_actors, scaling = c("none", "std")) {
   scaling <- match.arg(scaling)
-  out <- prepExoVar(effect_name = "same", param = param, scaling = scaling, variable = variable, attr_actors = attr_actors, transform=transform)
+  out <- prepExoVar(effect_name = "same", param = param, scaling = scaling, variable = variable, attr_actors = attr_actors)
   out
 }
 
