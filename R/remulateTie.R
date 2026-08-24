@@ -300,6 +300,16 @@ remulateTie <- function(
   #stores the event counts for dyads in a #sender x #recv matrix
   adj_mat <- initialize_adj_mat(actors_map, initial, rs)
 
+  #initial events as (time, sender id, receiver id); NULL when there is no initial edgelist
+  initial_el <- NULL
+  if (is.data.frame(initial)) {
+    initial_el <- cbind(initial[[1]],
+                        actors_map$id[match(initial[[2]], actors_map$name)],
+                        actors_map$id[match(initial[[3]], actors_map$name)])
+    #let the first sampled event see the initial history
+    statistics[[1]] <- computeStatsTie(int_effects, rs, actors_map$id, initial_el, adj_mat, attributes, interact_effects, scaling, mem_start, mem_end, statistics[[1]])
+  }
+
   i = 1
 
   while(t <= endTime){
@@ -356,6 +366,10 @@ remulateTie <- function(
 
     #update adj mat
     #TODO: move to C++
+    #memory is computed over the initial history plus the events simulated so far
+    mem_el <- rbind(initial_el, edgelist)
+    m <- nrow(mem_el)
+
     if (memory == "full") {
       adj_mat[edgelist[i, 2], edgelist[i, 3]] = adj_mat[edgelist[i, 2], edgelist[i, 3]] + 1;
     }
@@ -363,17 +377,17 @@ remulateTie <- function(
       #window memory takes memory by time window
       #TODO: to vectorize
       adj_mat[] <- 0
-      in_window <- which(edgelist[, 1] > t - memoryParam) #event indices which are in memoryParam
+      in_window <- which(mem_el[, 1] > t - memoryParam) #event indices which are in memoryParam
       for (ind in in_window) {
-        adj_mat[edgelist[ind, 2], edgelist[ind, 3]] = adj_mat[edgelist[ind, 2], edgelist[ind, 3]] + 1;
+        adj_mat[mem_el[ind, 2], mem_el[ind, 3]] = adj_mat[mem_el[ind, 2], mem_el[ind, 3]] + 1;
       }
     }
     else if (memory == "window_m") {
       #window_m takes memory by last m events
-      if (memoryParam < i) {
+      if (memoryParam < m) {
         adj_mat[] <- 0
-        for (ind in c(i - memoryParam, i)) {
-          adj_mat[edgelist[ind, 2], edgelist[ind, 3]] = adj_mat[edgelist[ind, 2], edgelist[ind, 3]] + 1;
+        for (ind in c(m - memoryParam, m)) {
+          adj_mat[mem_el[ind, 2], mem_el[ind, 3]] = adj_mat[mem_el[ind, 2], mem_el[ind, 3]] + 1;
         }
       } else {
         adj_mat[edgelist[i, 2], edgelist[i, 3]] = adj_mat[edgelist[i, 2], edgelist[i, 3]] + 1;
@@ -382,28 +396,28 @@ remulateTie <- function(
     else if (memory == "decay") {
       #TODO: to vectorize
       adj_mat[] <- 0
-      for (j in 1:i) {
+      for (j in 1:m) {
         #loop through edgelist
-        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + exp((-(t - edgelist[j, 1])) * (log(2) / memoryParam))
+        adj_mat[mem_el[j, 2], mem_el[j, 3]] = adj_mat[mem_el[j, 2], mem_el[j, 3]] + exp((-(t - mem_el[j, 1])) * (log(2) / memoryParam))
       }
     }
     else if (memory == "logistic") {
       #TODO: to vectorize
       adj_mat[] <- 0
-      for (j in 1:i) {
+      for (j in 1:m) {
         #loop through edgelist
-        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + 1/(1+exp(memoryParam[1]*((t - edgelist[j, 1])-memoryParam[2])))
+        adj_mat[mem_el[j, 2], mem_el[j, 3]] = adj_mat[mem_el[j, 2], mem_el[j, 3]] + 1/(1+exp(memoryParam[1]*((t - mem_el[j, 1])-memoryParam[2])))
       }
     }
     else if (memory == "custom") {
       memoryFunction_fun <- function(x) {
         eval(memoryFunction[[2]])
       }
-      
+
       adj_mat[] <- 0
-      for (j in 1:i) {
+      for (j in 1:m) {
         #loop through edgelist
-        adj_mat[edgelist[j, 2], edgelist[j, 3]] = adj_mat[edgelist[j, 2], edgelist[j, 3]] + memoryFunction_fun(t - edgelist[j, 1])
+        adj_mat[mem_el[j, 2], mem_el[j, 3]] = adj_mat[mem_el[j, 2], mem_el[j, 3]] + memoryFunction_fun(t - mem_el[j, 1])
       }
     }
     
